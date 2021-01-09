@@ -2,21 +2,53 @@
 #+AUTHOR:   Gabriel Dos Santos
 
 ** Introduction
-The knapsack problem is a problem in combinatorial optimization: given a set of items, each with a weight and a value, determine the number of each item to include in a collection so that the total weight is less than or equal to a given limit and the total value is as large as possible. It derives its name from the problem faced by someone who is constrained by a fixed-size knapsack and must fill it with the most valuable items. The problem often arises in resource allocation where the decision makers have to choose from a set of non-divisible projects or tasks under a fixed budget or time constraint, respectively.
+The knapsack problem is a problem in combinatorial optimization: given a set of items, each with a weight and a value, determine the number of each item to include in a collection so that the total weight is less than or equal to a given limit and the total value is as large as possible. The problem often arises in resource allocation where the decision makers have to choose from a set of non-divisible projects or tasks under a fixed budget or time constraint, respectively.
 
 ** Description
-In this implementation, the followings are defined:
-- the number of packages,
-- the maximum weight of each package,
-- the maximum weight of a batch of packages.
+To put this into perspective, a delivery or logistics company (like UPS, DHL, etc...) faces a similar situation as they have to handle ~n~ number of packages of varying weights ~p0~, ~p1~, ..., ~pn~. To deliver these packages, they use trucks that can be loade up to a maximum weight ~P~.
+Their goal is to put the packages into the trucks, while also using the least amount of trucks possible. The last implies that the weight sum of packages is less or equal to ~P~, the maximum weight that a truck can carry.
 
-An array of random integers (from 1 to the maximum weight per package) representing the packages is generated.
-The goal is to fill each batch to its maximum weight with the highest amount of packages, in order to have the least amount of batches by the end.
+A solution to this problem is to represent the packages as a list of integers (representing the weight of each package), and the trucks as lists of the weights of packages they contain.
 
-Three algorithm that try to answer this problem have been implemented:
-- the first one fills the batches with each value of the array, as they come.
-- the second algorithm first sorts the array (using an implementation of the ~quicksort algorithm~), reverses it, and then starts filling the batches.
-- the third algorithm optimizes the filling of each batch by first sorting the array, reversing it and using nested ~for~ loops to find complementary values.
+For example, for a maximum of 10 tons per truck and a list of packages (in tons): (1, 4, 1, 6, 7, 9, 3, 2, 8), then the following arrangement: (100, 100, 200, 600), (300, 700), (400), (800) and (900) is a solution using five trucks.
+
+A solution is said to be optimal if it uses the least amount of trucks for all the given solutions.
+
+Three algorithms that answer this problem have been implemented:
+- the first one fills the trucks with the packages as they come in the list (no space optimization).
+- the second algorithm first sorts the list of weights (using an implementation of the ~quicksort algorithm~), reverses it, and then loads the trucks with the packages as they come (minimal optimization).
+- the third algorithm optimizes the loading of the trucks by applying the same steps as the second one and then finds complementary weight to load the trucks (optimal solution).
+
+** Memory optimizations
+The simplest and most intuitive way to store the list of trucks and the weights they carry is to use a matrix.
+For the example above we get the following:
+#+BEGIN_SRC
+( 1 1 2 6 0 0 0 0 0 0 )
+( 3 7 0 0 0 0 0 0 0 0 )
+( 4 0 0 0 0 0 0 0 0 0 )
+( 8 0 0 0 0 0 0 0 0 0 )
+( 9 0 0 0 0 0 0 0 0 0 )
+( 0 0 0 0 0 0 0 0 0 0 )
+( 0 0 0 0 0 0 0 0 0 0 )
+( 0 0 0 0 0 0 0 0 0 0 )
+( 0 0 0 0 0 0 0 0 0 0 )
+#+END_SRC
+
+It becomes pretty obvious that storing the algorithm's result in a matrix is not efficient at all, as, in this case, 90% of the memory allocated is initialized but not used.
+
+Another solution is to use a CSR (Compressed Sparse Row) representation, as adviced by [[https://github.com/yaspr][yaspr]].
+It instead uses three one-dimensional arrays that each compute a different information:
+- the first one stores the values ~V~,
+- the second one stores the column index ~COL_INDEX~,
+- the third one encodes the index in ~V~ and ~COL_INDEX~, where the given row starts ~ROW_INDEX~.
+This gives us the following result for the Description's example:
+#+BEGIN_SRC
+V         = [ 1 1 2 6 3 7 4 8 9 ]
+COL_INDEX = [ 0 1 2 3 0 1 0 0 0 ]
+ROW_INDEX = [ 0 5 6 8 9 10 ]
+#+END_SRC
+
+For futher reading and documentation, please refer to [[https://en.wikipedia.org/wiki/Sparse_matrix#Compressed_sparse_row_(CSR,_CRS_or_Yale_format)][Sparse matrix Wikipedia page]].
 
 ** Installing and running
 First, clone the repository:
@@ -32,12 +64,5 @@ make
 
 Finally, run with the values that you want (or use ~make run~ for a demo):
 #+BEGIN_SRC sh
-target/main $(NB_PACKAGES) $(MAX_PACKAGE_WEIGHT) $(MAX_BATCH_WEIGHT)
+target/main -[matrix | csr] [NB_PACKAGES] [MAX_PACKAGE_WEIGHT] [MAX_TRUCK_WEIGHT]
 #+END_SRC
-
-You can also use the provided debugging command ~make gdb~ and ~make vg~ to run with ~gdb~ and ~valgrind~ respectively.
-
-** Possible optimizations
-- implementing a different struct that does not allocate unused memory, instead of using matrices.
-- ...
-Any other ideas are welcomed.
