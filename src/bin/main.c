@@ -5,36 +5,43 @@
 
 int main(int argc, char **argv)
 {
-    if (argc < 5)
+    if (argc < 2)
     {
-        return printf("Error: not enough arguments\n"), 1;
+        printf("Error: not enough arguments\n");
+        printf("Usage: %s -[m | c | h] [NB_PACKAGES] [MAX_PACKAGE_WEIGHT] [MAX_TRUCK_WEIGHT]\n", argv[0]);
+        return 1;
     }
 
-    const u32 NB_PACKAGES = atoi(argv[2]);
-    const u32 MAX_WEIGHT = atoi(argv[3]);
-    const u32 MAX_BATCH_WEIGHT = atoi(argv[4]);
-
-    //printf("\nNumber of packages:\t\t\t%d\nMaximum weight of a package:\t\t%d\nMaximum weight per batch of packages:\t%d\n", NB_PACKAGES, MAX_WEIGHT, MAX_BATCH_WEIGHT);
-
-    arr_t *packages = init_rand_arr(NB_PACKAGES, MAX_WEIGHT);
-    //printf("Initial array:\n");
-    //print_arr(packages);
-
-    if (!strcmp(argv[1], "matrix"))
+    if (!strcmp(argv[1], "-h"))
     {
-        printf("matrix\n");
-        printf("\nFirst in, first out:\n");
+        printf("Usage: %s [OPTIONS] [NB_PACKAGES] [MAX_PACKAGE_WEIGHT] [MAX_TRUCK_WEIGHT]\n", argv[0]);
+        printf("Available options:\n");
+        printf("\t-m: runs using matrices to store result\n");
+        printf("\t-c: runs using CSR representation to store result\n");
+        printf("\t-h: prints this help\n");
+    }
+
+    if (!strcmp(argv[1], "-m"))
+    {
+        const u32 NB_PACKAGES = atoi(argv[2]);
+        const u32 MAX_WEIGHT = atoi(argv[3]);
+        const u32 MAX_BATCH_WEIGHT = atoi(argv[4]);
+
+        arr_t *packages = init_rand_arr(NB_PACKAGES, MAX_WEIGHT);
+
+        printf("\tMatrix:\n");
+        printf("First in, first out: ");
         matrix_t *first_algo = fifo(packages, MAX_BATCH_WEIGHT);
         //print_matrix(first_algo);
         print_matrix_perf(first_algo);
 
-        printf("Big ones first:\n");
+        printf("Big ones first: ");
         arr_t *packages_copy_one = copy_arr(packages);
         matrix_t *second_algo = big_ones_first(packages_copy_one, MAX_BATCH_WEIGHT);
         //print_matrix(second_algo);
         print_matrix_perf(second_algo);
 
-        printf("Optimal:\n");
+        printf("Optimal: ");
         arr_t *packages_copy_two = copy_arr(packages);
         matrix_t *third_algo = optimized(packages_copy_two, MAX_BATCH_WEIGHT);
         //print_matrix(third_algo);
@@ -48,20 +55,27 @@ int main(int argc, char **argv)
         destroy_matrix(second_algo);
         destroy_matrix(third_algo);
     }
-    else if (!strcmp(argv[1], "csr"))
+    else if (!strcmp(argv[1], "-c"))
     {
-        printf("\nFirst in, first out:\n");
+        const u32 NB_PACKAGES = atoi(argv[2]);
+        const u32 MAX_WEIGHT = atoi(argv[3]);
+        const u32 MAX_BATCH_WEIGHT = atoi(argv[4]);
+
+        arr_t *packages = init_rand_arr(NB_PACKAGES, MAX_WEIGHT);
+
+        printf("\tCSR:\n");
+        printf("First in, first out: ");
         csr_t *first_algo = fifo_csr(packages, MAX_BATCH_WEIGHT);
         //print_csr(first_algo);
         print_csr_perf(first_algo);
 
-        printf("Big ones first:\n");
+        printf("Big ones first: ");
         arr_t *packages_copy_one = copy_arr(packages);
         csr_t *second_algo = big_ones_first_csr(packages_copy_one, MAX_BATCH_WEIGHT);
         //print_csr(second_algo);
         print_csr_perf(second_algo);
 
-        printf("Optimal:\n");
+        printf("Optimal: ");
         arr_t *packages_copy_two = copy_arr(packages);
         csr_t *third_algo = optimized_csr(packages_copy_two, MAX_BATCH_WEIGHT);
         //print_csr(third_algo);
@@ -77,7 +91,9 @@ int main(int argc, char **argv)
     }
     else
     {
-        printf("Error: unknown argument %s", argv[1]);
+        printf("Error: not enough arguments\n");
+        printf("Usage: %s -[m | c | h] [NB_PACKAGES] [MAX_PACKAGE_WEIGHT] [MAX_TRUCK_WEIGHT]\n", argv[0]);
+        return 1;
     }
 
     return 0;

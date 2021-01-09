@@ -452,7 +452,7 @@ void print_matrix_perf(matrix_t *m)
             }
         }
         f32 perf = (f32)count/m->size * 100.0;
-        printf("Matrix: %.2f%%\n", perf);
+        printf("%.2f%%\n", perf);
     }
     else
     {
@@ -466,7 +466,7 @@ void print_csr_perf(csr_t *c)
     if (c)
     {
         f32 perf = (f32)c->nb_row/(f32)c->size * 100.0;
-        printf("CSR: %.2f%%\n", perf);
+        printf("%.2f%%\n", perf);
     }
     else
     {
