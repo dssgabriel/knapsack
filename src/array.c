@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "types.h"
-#include "common.h"
+#include "array.h"
 
 //
 arr_t *init_arr(u32 size)
@@ -198,4 +197,3 @@ void destroy_arr(arr_t *a)
         printf("Error: arr_t pointer is NULL\n");
     }
 }
-

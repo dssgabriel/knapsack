@@ -1,5 +1,5 @@
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef ARRAY_H
+#define ARRAY_H
 
 #include "types.h"
 
@@ -11,7 +11,6 @@ typedef struct arr_s {
 } arr_t;
 
 // Allocates the specified memory for an arr_t
-// Initializes it with 0s
 arr_t *init_arr(u32 size);
 
 // Allocates the specified memory for an arr_t
